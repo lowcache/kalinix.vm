@@ -53,7 +53,11 @@ pkgs: with pkgs; [
   crunch
   hashcat
   hcxtools
-  john
+  (john.overrideAttrs (oldAttrs: {
+    src = oldAttrs.src.overrideAttrs (oldSrcAttrs: {
+      outputHash = "sha256-zO1/KUJe3LvYCGlwVpNg5uDwPRD0ql/7anErb7tywC0=";
+    });
+  }))
   # python36Packages.patator
   phrasendrescher
   thc-hydra
@@ -66,7 +70,7 @@ pkgs: with pkgs; [
   patchelf
   radare2
   cutter
-  retdec
+  # retdec
   # snowman
   valgrind
   yara
