@@ -1,5 +1,7 @@
 {
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/d233902339c02a9c334e7e593de68855ad26c4cb";
   inputs.nixos-fhs-compat.url = "github:balsoft/nixos-fhs-compat";
+  inputs.nixos-fhs-compat.inputs.nixpkgs.follows = "nixpkgs";
   inputs.microvm.url = "github:astro/microvm.nix";
   inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
 
@@ -17,7 +19,6 @@
         ./configuration.nix
         {
           config = {
-            _module.check = false; # Turn off schema checks to bypass missing options on older nixpkgs
             boot.isContainer = nixpkgs.lib.mkForce false;
             networking.useDHCP = nixpkgs.lib.mkForce false;
             microvm = {
@@ -38,9 +39,6 @@
       ];
       specialArgs = {
         inherit inputs;
-        lib = nixpkgs.lib.extend (self: super: {
-          nonEmptyStr = nixpkgs.lib.types.str; # Provide fallback for missing type in older nixpkgs
-        });
       };
     };
 

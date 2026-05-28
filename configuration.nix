@@ -1,7 +1,14 @@
 { config, pkgs, lib, inputs, ... }:
 let get-host-ip = "$(ip route show | awk '/default/ {print $3; exit}')";
 in {
-  imports = [ inputs.nixos-fhs-compat.nixosModules.combined ];
+  imports = [
+    inputs.nixos-fhs-compat.nixosModules.combined
+    ./lsb.nix
+  ];
+
+  disabledModules = [
+    "${inputs.nixos-fhs-compat}/modules/lsb.nix"
+  ];
 
   environment = {
     fhs.enable = true;
@@ -15,6 +22,7 @@ in {
   networking.useDHCP = false;
   networking.hostName = "kalinix";
   networking.firewall.enable = true;
+  system.stateVersion = "26.05";
 
   nixpkgs.config.allowUnfree = true;
 

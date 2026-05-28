@@ -18,10 +18,10 @@ pkgs: with pkgs; [
   git
   p0f
   pdf-parser
-  python39Packages.binwalk
-  python39Packages.distorm3
+  binwalk
+  python3Packages.distorm3
   sleuthkit
-  volatility
+  volatility3
 
   ### Hardware ###
   apktool
@@ -61,13 +61,13 @@ pkgs: with pkgs; [
   ### Reverse ###
   binutils
   elfutils
-  jd
-  jd-gui
+  jadx
+  bytecode-viewer
   patchelf
   radare2
-  radare2-cutter
+  cutter
   retdec
-  snowman
+  # snowman
   valgrind
   yara
 
