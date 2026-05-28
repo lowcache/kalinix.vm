@@ -108,7 +108,7 @@
           at-spi2-atk
 
           ## Sound libraries
-          alsaLib
+          alsa-lib
           openal
 
           ## SDL
@@ -188,7 +188,7 @@
             bzip2
           ] ++ lib.optionals config.environment.lsb.enableDesktop [
             # Desktop
-            xdg_utils
+            xdg-utils
             xorg.xrandr
             fontconfig
             cups

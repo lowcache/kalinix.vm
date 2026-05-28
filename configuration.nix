@@ -27,7 +27,7 @@ in {
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs;
-    [ waypipe socat dpkg xlibs.xeyes ] ++ import ./pkgs.nix pkgs;
+    [ waypipe socat dpkg xorg.xeyes ] ++ import ./pkgs.nix pkgs;
 
   users.users.user = {
     isNormalUser = true;
