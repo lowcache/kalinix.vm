@@ -1,6 +1,4 @@
-{ config, pkgs, lib, ... }:
-# Based on work by matthewbauer <matthewbauer.us>
-{
+{ config, pkgs, lib, ... }: {
 
   options = {
     environment.lsb.enable = lib.mkOption {
@@ -32,9 +30,6 @@
 
   config =
     let
-      # based on LSB 5.0
-      # reference: http://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-Common/LSB-Common/requirements.html#RLIBRARIES
-
       libsFromPkgs = pkgs:
         with pkgs;
         [
@@ -66,23 +61,23 @@
           # Desktop
 
           ## Graphics Libraries (X11)
-          xorg.libX11
-          xorg.libxcb
-          xorg.libSM
-          xorg.libICE
-          xorg.libXt
-          xorg.libXft
-          xorg.libXrender
-          xorg.libXext
-          xorg.libXi
-          xorg.libXtst
-          xorg.libXcursor
-          xorg.libXcomposite
-          xorg.libXfixes
-          xorg.libXdamage
-          xorg.libXrandr
-          xorg.libXScrnSaver
-          xorg.libXfixes
+          libX11
+          libxcb
+          libSM
+          libICE
+          libXt
+          libXft
+          libXrender
+          libXext
+          libXi
+          libXtst
+          libXcursor
+          libXcomposite
+          libXfixes
+          libXdamage
+          libXrandr
+          libXScrnSaver
+          libXfixes
           libxkbcommon
 
           ## OpenGL Libraries
@@ -173,7 +168,7 @@
             psmisc
             ed
             gettext
-            utillinux
+            util-linux
 
             # Languages
             perl
@@ -189,7 +184,7 @@
           ] ++ lib.optionals config.environment.lsb.enableDesktop [
             # Desktop
             xdg-utils
-            xorg.xrandr
+            xrandr
             fontconfig
             cups
 
