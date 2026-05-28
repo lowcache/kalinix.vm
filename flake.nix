@@ -54,7 +54,7 @@
         };
         microvm = {
           type = "app";
-          program = "${self.nixosConfigurations.microvm.config.microvm.runner.qemu}/bin/run-microvm";
+          program = "${self.nixosConfigurations.microvm.config.microvm.runner.qemu}/bin/microvm-run";
         };
       };
 
