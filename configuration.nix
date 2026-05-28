@@ -1,5 +1,5 @@
 { config, pkgs, lib, inputs, ... }:
-let get-host-ip = "$(ip route | grep default | cut -d' ' -f3)";
+let get-host-ip = "$(ip route show | awk '/default/ {print $3; exit}')";
 in {
   imports = [ inputs.nixos-fhs-compat.nixosModules.combined ];
 
@@ -33,7 +33,7 @@ in {
     requires = [ "network.target" ];
     path = [ pkgs.socat pkgs.iproute2 ];
     script =
-      "socat UNIX-LISTEN:/tmp/waypipe-server.sock,reuseaddr,fork,mode=777 TCP-CONNECT:${get-host-ip}:1337";
+      "socat UNIX-LISTEN:/tmp/waypipe-server.sock,reuseaddr,fork,user=user,group=users,mode=660 TCP-CONNECT:${get-host-ip}:1337";
   };
 
   environment.shellInit = "export DISPLAY=${get-host-ip}:0";
