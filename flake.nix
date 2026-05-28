@@ -21,6 +21,8 @@
           config = {
             boot.isContainer = nixpkgs.lib.mkForce false;
             networking.useDHCP = nixpkgs.lib.mkForce false;
+            environment.fhs.enable = nixpkgs.lib.mkForce false;
+            environment.lsb.enable = nixpkgs.lib.mkForce false;
             microvm = {
               hypervisor = "qemu";
               shares = [{
