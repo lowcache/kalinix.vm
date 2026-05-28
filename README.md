@@ -36,7 +36,7 @@ To launch the MicroVM:
 nix run .#microvm --extra-experimental-features "nix-command flakes" --extra-deprecated-features "url-literals" --extra-deprecated-features "or-as-identifier" --extra-deprecated-features "broken-string-indentation"
 ```
 
-*   **Note:** We have developed a custom Nix evaluation layer that automatically bypasses legacy `nixpkgs` module schema incompatibilities (including the missing `boot.initrd.systemd` and `nonEmptyStr` type checks), allowing seamless execution even on systems pinned to older lockfiles.
+*   **Note:** developed a custom Nix evaluation layer that automatically bypasses legacy `nixpkgs` module schema incompatibilities (including the missing `boot.initrd.systemd` and `nonEmptyStr` type checks), allowing seamless execution even on systems pinned to older lockfiles.
 
 ---
 
