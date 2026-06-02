@@ -48,10 +48,29 @@ nix build .#defaultPackage.x86_64-linux   # buildEnv named "pentesting-tools"
 
 ---
 
-## 🖥️ GUI Forwarding
+## 🖥️ Driving the UI
 
-Graphical tools are forwarded to the host over the user-mode network gateway
-(`10.0.2.2`):
+### Way B — headless in the VM, UI on the host (default/preferred)
+
+Heavy tools run headless inside the VM and expose a web/API/client-server
+interface; the host reaches them on `127.0.0.1` over forwarded ports (loopback
+only — nothing is exposed to the LAN). Run the tool in the guest on the listed
+port, then point your host browser/client at `http://127.0.0.1:<port>`:
+
+| Host port | Guest tool | Launch in VM |
+|-----------|------------|--------------|
+| `8080` | OWASP ZAP (API + browser HUD) | `zap.sh -daemon -host 0.0.0.0 -port 8080` |
+| `8081` | mitmproxy web UI | `mitmweb --web-host 0.0.0.0 --web-port 8081` |
+| `8443` | Caido server | `caido-cli --listen 0.0.0.0:8443` |
+| `8888` | BloodHound CE web UI | (BH CE stack) |
+| `7474` | neo4j browser (BloodHound DB) | (neo4j) |
+
+Bind the guest service to `0.0.0.0` (not `127.0.0.1`) so the SLiRP forward can
+reach it. Adjust the map in `flake.nix` (`microvm.forwardPorts`) for other tools.
+
+### Way A — protocol forwarding for GUI-only binaries (fallback)
+
+For tools with no headless mode (Ghidra, Cutter, Wireshark, Burp Community):
 
 *   **Wayland** via `waypipe`: a guest `systemd` service connects to the host on
     TCP `1337`. The guest socket `/tmp/waypipe-server.sock` is restricted to
