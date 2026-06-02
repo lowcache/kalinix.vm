@@ -32,17 +32,13 @@ zero extra disk footprint by sharing the host's `/nix/store` read-only.
 ## 🚀 Usage
 
 ```bash
-nix run .#microvm \
-  --extra-experimental-features "nix-command flakes" \
-  --extra-deprecated-features "url-literals" \
-  --extra-deprecated-features "or-as-identifier" \
-  --extra-deprecated-features "broken-string-indentation"
+nix run .#microvm
 ```
 
-The `--extra-deprecated-features` flags are required only because this flake is
-pinned to an older `nixpkgs` revision whose expressions predate some Nix/Lix
-deprecations. When the pin is bumped to match the host channel, they can be
-dropped.
+(If `nix-command`/`flakes` aren't enabled globally, prepend
+`--extra-experimental-features "nix-command flakes"`.)
+
+This flake tracks `nixos-unstable`, so no deprecated-feature flags are needed.
 
 A standalone bundle of just the tools (no VM) is also available:
 
