@@ -1,24 +1,6 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, ... }:
 let get-host-ip = "$(ip route show | awk '/default/ {print $3; exit}')";
 in {
-  imports = [
-    inputs.nixos-fhs-compat.nixosModules.combined
-    ./lsb.nix
-  ];
-
-  disabledModules = [
-    "${inputs.nixos-fhs-compat}/modules/lsb.nix"
-  ];
-
-  environment = {
-    fhs.enable = true;
-    fhs.linkLibs = true;
-    lsb.enable = true;
-    lsb.support32Bit = true;
-  };
-
-  boot.isContainer = true;
-
   networking.useDHCP = false;
   networking.hostName = "kalinix";
   networking.firewall.enable = true;
@@ -27,7 +9,7 @@ in {
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs;
-    [ waypipe socat dpkg xorg.xeyes ] ++ import ./pkgs.nix pkgs;
+    [ waypipe socat dpkg xeyes ] ++ import ./pkgs.nix pkgs;
 
   users.users.user = {
     isNormalUser = true;

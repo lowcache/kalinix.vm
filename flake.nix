@@ -1,17 +1,9 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/d233902339c02a9c334e7e593de68855ad26c4cb";
-  inputs.nixos-fhs-compat.url = "github:balsoft/nixos-fhs-compat";
-  inputs.nixos-fhs-compat.inputs.nixpkgs.follows = "nixpkgs";
   inputs.microvm.url = "github:astro/microvm.nix";
   inputs.microvm.inputs.nixpkgs.follows = "nixpkgs";
 
   outputs = { self, nixpkgs, microvm, ... }@inputs: {
-    nixosConfigurations.container = nixpkgs.lib.nixosSystem {
-      system = "x86_64-linux";
-      modules = [ ./configuration.nix ];
-      specialArgs = { inherit inputs; };
-    };
-
     nixosConfigurations.microvm = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
       modules = [
@@ -19,10 +11,6 @@
         ./configuration.nix
         {
           config = {
-            boot.isContainer = nixpkgs.lib.mkForce false;
-            networking.useDHCP = nixpkgs.lib.mkForce false;
-            environment.fhs.enable = nixpkgs.lib.mkForce false;
-            environment.lsb.enable = nixpkgs.lib.mkForce false;
             microvm = {
               hypervisor = "qemu";
               shares = [{
@@ -45,20 +33,12 @@
       };
     };
 
-    apps.x86_64-linux =
-      let
-        scripts = nixpkgs.legacyPackages.x86_64-linux.callPackage ./scripts { inherit self; };
-      in
-      {
-        container = {
-          type = "app";
-          program = toString scripts.run-container;
-        };
-        microvm = {
-          type = "app";
-          program = "${self.nixosConfigurations.microvm.config.microvm.runner.qemu}/bin/microvm-run";
-        };
+    apps.x86_64-linux = {
+      microvm = {
+        type = "app";
+        program = "${self.nixosConfigurations.microvm.config.microvm.runner.qemu}/bin/microvm-run";
       };
+    };
 
     defaultPackage = builtins.mapAttrs
       (system: _:

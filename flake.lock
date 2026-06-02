@@ -21,21 +21,6 @@
         "type": "github"
       }
     },
-    "nixos-fhs-compat": {
-      "locked": {
-        "lastModified": 1709818295,
-        "narHash": "sha256-ik5c1pSeTwQLoFibApZaIL7KqG4wPAzI7maPb+gqu+Y=",
-        "owner": "balsoft",
-        "repo": "nixos-fhs-compat",
-        "rev": "9f6a67af9c8b63111dc6b277ec313097b6278472",
-        "type": "github"
-      },
-      "original": {
-        "owner": "balsoft",
-        "repo": "nixos-fhs-compat",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1778869304,
@@ -55,7 +40,6 @@
     "root": {
       "inputs": {
         "microvm": "microvm",
-        "nixos-fhs-compat": "nixos-fhs-compat",
         "nixpkgs": "nixpkgs"
       }
     },

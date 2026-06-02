@@ -1,65 +1,79 @@
-# Hardened Kalinix Pentesting Environment
+# Kalinix MicroVM Pentesting Environment
 
-A highly secure, containerized, and virtualized Nix-based pentesting environment built for `kalinix`. This repository has been heavily overhauled to remediate critical security vulnerabilities in the host-guest graphical sharing mechanism, prevent active system configuration leaks, and integrate a complete **MicroVM** runtime profile for zero-footprint, hardware-accelerated user-space virtualization.
-
----
-
-## 🌟 Features & OVERHAUL
-
-### 1. Graphical Sharing Hardening (Security Overhaul)
-*   **Host Socket Exposure Patched:** Previously, the host wrapper script started `socat` TCP listeners on `0.0.0.0` (all interfaces) for both Wayland (port `1337`) and X11 (port `6000`). This exposed your host graphical session to anyone on your local network. It has been patched to dynamically resolve the virtual interface IP (`$host_ip`) between the host and guest, restricting `socat` bindings strictly to the internal container bridge subnet.
-*   **Firewall Rule Leakage Fixed:** The script previously inserted raw host-level `iptables` rules (`sudo iptables -I INPUT ...`) to permit container traffic but never removed them. The shell exit `cleanup()` trap has been completely restructured to dynamically and reliably flush out these exceptions when the session terminates.
-*   **Orphaned Mount Points Fixed:** The home directory mount (`sudo mount -o rbind ...`) was left active on the host long after the container stopped, locking local filesystems. An automated, safe lazy unmount (`sudo umount -l`) has been integrated into the exit trap.
-*   **Waypipe Socket Restricted:** The guest Wayland socket `/tmp/waypipe-server.sock` was set to world-writable (`mode=777`). This has been restricted to standard user-group permissions (`mode=660` under `user:users`).
-
-### 2. Dual Runtime Architectures
-You can execute this environment in two distinct modes:
-
-*   **Imperative Container (Default):** Runs a lightweight systemd-nspawn container via `nixos-container`. Best for routine tasks where sharing the host kernel is preferred.
-*   **Hermetic MicroVM (Recommended for High Isolation):** Leverages `microvm.nix` to compile and run the entire environment in a dedicated, hardware-accelerated QEMU Virtual Machine in user-space.
-    *   **Near-Instant Boot:** Boots in under a second using optimized guest kernels.
-    *   **Zero Extra Disk Footprint:** Mounts the host's `/nix/store` as a read-only virtiofs/9p share, taking up **zero extra gigabytes** on your local drive.
-    *   **Kernel Isolation:** Runs an independent, separate guest Linux kernel. Any kernel crashes, panics, or low-level exploits remain entirely confined to QEMU, offering complete isolation for analyzing suspect tools or binaries.
-    *   **No Sudo / Rootless Execution:** Runs entirely inside user-space without modifying host firewall rules or mounting host paths.
+A Nix-based pentesting environment that boots in under a second to a full toolset
+inside a hermetic, hardware-accelerated QEMU MicroVM. It runs entirely in
+user-space — no root, no host firewall changes, no host bind-mounts — and adds
+zero extra disk footprint by sharing the host's `/nix/store` read-only.
 
 ---
 
-## 🚀 Getting Started & Usage
+## 🌟 Design
 
-Clone your fork and navigate into the repository directory.
+*   **Near-instant boot.** Uses `microvm.nix` with an optimized guest kernel.
+*   **Zero extra disk footprint.** The host `/nix/store` is mounted read-only over
+    a 9p `ro-store` share into `/nix/.ro-store`, with a writable overlay on top.
+    Nothing the VM needs is duplicated on disk.
+*   **Kernel isolation.** The guest runs its own Linux kernel under QEMU. Panics,
+    crashes, and low-level exploits from suspect binaries stay confined to the VM.
+*   **Rootless / no host mutation.** User-mode (slirp) networking means no `sudo`,
+    no `iptables` rules on the host, and no host paths mounted into the guest. The
+    only host-side requirement is a graphical forwarder (see GUI Forwarding).
 
-### Profile A: Running the Hermetic MicroVM (Recommended)
-This runs the system completely sandboxed inside an isolated QEMU VM in user-space.
+> **Note on the removed container profile.** Earlier revisions also shipped an
+> imperative `systemd-nspawn` container that started host-side `socat` listeners,
+> inserted raw `iptables` rules, and bind-mounted `$HOME` into the guest. That
+> path required `sudo` and was the repository's entire privileged attack surface.
+> It has been removed in favor of the MicroVM, which achieves the same goal
+> without touching the host. The original idea is preserved; the dangerous
+> implementation is gone.
 
-To launch the MicroVM:
+---
+
+## 🚀 Usage
+
 ```bash
-nix run .#microvm --extra-experimental-features "nix-command flakes" --extra-deprecated-features "url-literals" --extra-deprecated-features "or-as-identifier" --extra-deprecated-features "broken-string-indentation"
+nix run .#microvm \
+  --extra-experimental-features "nix-command flakes" \
+  --extra-deprecated-features "url-literals" \
+  --extra-deprecated-features "or-as-identifier" \
+  --extra-deprecated-features "broken-string-indentation"
 ```
 
-*   **Note:** developed a custom Nix evaluation layer that automatically bypasses legacy `nixpkgs` module schema incompatibilities (including the missing `boot.initrd.systemd` and `nonEmptyStr` type checks), allowing seamless execution even on systems pinned to older lockfiles.
+The `--extra-deprecated-features` flags are required only because this flake is
+pinned to an older `nixpkgs` revision whose expressions predate some Nix/Lix
+deprecations. When the pin is bumped to match the host channel, they can be
+dropped.
+
+A standalone bundle of just the tools (no VM) is also available:
+
+```bash
+nix build .#defaultPackage.x86_64-linux   # buildEnv named "pentesting-tools"
+```
 
 ---
 
-### Profile B: Running the Hardened Container
-This compiles and runs the hardened systemd-nspawn container (requires `sudo` for container provisioning and virtual interface creation).
+## 🖥️ GUI Forwarding
 
-To launch the container:
-```bash
-nix run .#container
-```
+Graphical tools are forwarded to the host over the user-mode network gateway
+(`10.0.2.2`):
 
-The script will:
-1.  Check for an existing container or create a new one.
-2.  Start the container and dynamically provision isolated `socat` bridge listeners.
-3.  Establish an explicit host firewall exception restricted solely to the container's virtual IP.
-4.  Bind-mount your local user home directory securely.
-5.  Drop you into an interactive bash shell inside the container.
-6.  **Upon exiting the shell**, the exit trap will automatically clean up all background jobs, unmount active filesystems, and delete the custom firewall rule.
+*   **Wayland** via `waypipe`: a guest `systemd` service connects to the host on
+    TCP `1337`. The guest socket `/tmp/waypipe-server.sock` is restricted to
+    `user:users` (`mode=660`).
+*   **X11** via `DISPLAY=<host>:0`.
+
+Run a matching `waypipe`/X listener on the host to receive the windows.
 
 ---
 
 ## ⚖️ Attribution & Licensing
 
-*   **Base Project:** This repository is a fork of the public NixOS pentesting configuration originally published by [balsoft/kalinix](https://github.com/balsoft/kalinix). The base project did not contain an explicit open-source license.
-*   **Modifications & Fork Additions:** All security hardening patches, cleanup traps, schema compatibility fixes, and MicroVM integrations developed in this fork are licensed under the **MIT License** (see the [LICENSE](file:///home/nondeus/CodeRepo/kalinix/LICENSE) file in this repository).
-*   For full details on the copyright lineage and modifications, refer to the [COPYING](file:///home/nondeus/CodeRepo/kalinix/COPYING) file.
+*   **Base Project:** This repository is a fork of the public NixOS pentesting
+    configuration originally published by
+    [balsoft/kalinix](https://github.com/balsoft/kalinix). The base project did
+    not contain an explicit open-source license.
+*   **Modifications & Fork Additions:** The MicroVM integration and subsequent
+    changes developed in this fork are licensed under the **MIT License** (see
+    [LICENSE](./LICENSE)).
+*   For full details on the copyright lineage and modifications, refer to
+    [COPYING](./COPYING).
