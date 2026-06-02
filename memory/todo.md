@@ -6,10 +6,15 @@ Open loops for **kalinix**.
 
 ## 1. Pending verification (immediate)
 
-* [ ] **Boot-test the VM.** Everything is build-verified, not boot-verified.
-  `nix run .#microvm`, confirm it reaches login, time the boot (claim: < 1s), and
-  verify a forwarded port answers (start `zap.sh -daemon -host 0.0.0.0 -port 8080`
-  in the guest, then `curl 127.0.0.1:8080` from the host).
+* [x] **Boot-test the VM (2026-06-02).** Boots clean on kernel 6.18.33 to
+  `user@kalinix:~$` autologin, no panics, all systemd targets reached. The test
+  caught a host-port collision (see mistakes.md#6), now fixed.
+* [ ] **Verify a forward end-to-end.** Not yet done non-interactively: start
+  `zap.sh -daemon -host 0.0.0.0 -port 8080` in the guest, then `curl
+  127.0.0.1:18080` from the host. Confirm the Way-B path actually carries traffic.
+* [ ] **Time the boot properly.** Run `systemd-analyze` inside the guest to check
+  the sub-second claim (serial-console wall-clock to login is a few seconds incl.
+  SeaBIOS, which is expected and not the same metric).
 
 ## 2. Enhancements
 

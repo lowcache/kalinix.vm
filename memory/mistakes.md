@@ -50,3 +50,22 @@ Pitfalls hit while modernizing **kalinix**. Study before editing `.nix`.
   the actual `nix build` had failed.
 * **Prevention Rule:** Read the real `BUILD EXIT: ${PIPESTATUS[0]}` line in the
   output, not just the task wrapper's exit summary.
+
+---
+
+## 6. Way-B host ports collided with host services
+
+* **Incident (2026-06-02):** The VM refused to boot:
+  `Could not set up host forwarding rule 'tcp:127.0.0.1:8080-:8080'`. qemu could
+  not bind host `127.0.0.1:8080` because the host already runs `open-webui`
+  there (and `ollama` on 11434). The build was green; only the boot-test caught
+  it.
+* **The Bug:** `microvm.forwardPorts` host ports were set to the same
+  conventional values as the guest ports (8080/8081/…), which clash with host
+  services. The `host.port` is bound on the HOST, so it must be host-unique.
+* **Fix:** Host ports moved to the `1xxxx` range (18080, 18081, 18443, 18888,
+  17474); guest ports kept conventional so in-VM tools still bind their defaults.
+* **Prevention Rule:** `host.port != guest.port` is fine and expected. Pick host
+  ports outside the host's listening set (`ss -tlnH`) — open-webui (8080) and
+  ollama (11434) are already taken on this machine. Build-verification cannot
+  catch a host bind conflict; only a boot-test can.

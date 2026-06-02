@@ -57,16 +57,18 @@ interface; the host reaches them on `127.0.0.1` over forwarded ports (loopback
 only — nothing is exposed to the LAN). Run the tool in the guest on the listed
 port, then point your host browser/client at `http://127.0.0.1:<port>`:
 
-| Host port | Guest tool | Launch in VM |
-|-----------|------------|--------------|
-| `8080` | OWASP ZAP (API + browser HUD) | `zap.sh -daemon -host 0.0.0.0 -port 8080` |
-| `8081` | mitmproxy web UI | `mitmweb --web-host 0.0.0.0 --web-port 8081` |
-| `8443` | Caido server | `caido-cli --listen 0.0.0.0:8443` |
-| `8888` | BloodHound CE web UI | (BH CE stack) |
-| `7474` | neo4j browser (BloodHound DB) | (neo4j) |
+| Host (`127.0.0.1`) | Guest port | Tool | Launch in VM |
+|--------------------|-----------|------|--------------|
+| `18080` | `8080` | OWASP ZAP (API + browser HUD) | `zap.sh -daemon -host 0.0.0.0 -port 8080` |
+| `18081` | `8081` | mitmproxy web UI | `mitmweb --web-host 0.0.0.0 --web-port 8081` |
+| `18443` | `8443` | Caido server | `caido-cli --listen 0.0.0.0:8443` |
+| `18888` | `8888` | BloodHound CE web UI | (BH CE stack) |
+| `17474` | `7474` | neo4j browser (BloodHound DB) | (neo4j) |
 
-Bind the guest service to `0.0.0.0` (not `127.0.0.1`) so the SLiRP forward can
-reach it. Adjust the map in `flake.nix` (`microvm.forwardPorts`) for other tools.
+Browse from the host at `http://127.0.0.1:<host-port>`. Host ports use the
+`1xxxx` range so they don't collide with host services (e.g. open-webui owns
+`8080`). Bind the guest service to `0.0.0.0` (not `127.0.0.1`) so the SLiRP
+forward can reach it. Adjust the map in `flake.nix` (`microvm.forwardPorts`).
 
 ### Way A — protocol forwarding for GUI-only binaries (fallback)
 

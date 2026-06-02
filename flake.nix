@@ -27,13 +27,14 @@
               # Way B: host -> guest port forwards over SLiRP user networking.
               # Run a tool headless in the VM on the guest port, then reach it from
               # the host at 127.0.0.1:<host.port>. Bound to loopback only, so nothing
-              # is exposed to the LAN.
+              # is exposed to the LAN. Host ports live in the 1xxxx range to avoid
+              # colliding with host services (e.g. open-webui already owns 8080).
               forwardPorts = [
-                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 8080; guest.port = 8080; } # ZAP -daemon (API + HUD)
-                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 8081; guest.port = 8081; } # mitmweb
-                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 8443; guest.port = 8443; } # caido-cli server
-                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 8888; guest.port = 8888; } # BloodHound CE web UI
-                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 7474; guest.port = 7474; } # neo4j browser (BloodHound DB)
+                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 18080; guest.port = 8080; } # ZAP -daemon (API + HUD)
+                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 18081; guest.port = 8081; } # mitmweb
+                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 18443; guest.port = 8443; } # caido-cli server
+                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 18888; guest.port = 8888; } # BloodHound CE web UI
+                { from = "host"; proto = "tcp"; host.address = "127.0.0.1"; host.port = 17474; guest.port = 7474; } # neo4j browser (BloodHound DB)
               ];
             };
           };
