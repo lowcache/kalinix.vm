@@ -25,7 +25,8 @@ zero extra disk footprint by sharing the host's `/nix/store` read-only.
 > path required `sudo` and was the repository's entire privileged attack surface.
 > It has been removed in favor of the MicroVM, which achieves the same goal
 > without touching the host. The original idea is preserved; the dangerous
-> implementation is gone.
+> implementation of the original code is gone. Code history is maintained for posterity 
+> and to give credit to the original authors' repo from which this project was forked. 
 
 ---
 
@@ -50,7 +51,7 @@ nix build .#defaultPackage.x86_64-linux   # buildEnv named "pentesting-tools"
 
 ## 🖥️ Driving the UI
 
-### Way B — headless in the VM, UI on the host (default/preferred)
+### Option A - Headless in the VM, UI on the host (default)
 
 Heavy tools run headless inside the VM and expose a web/API/client-server
 interface; the host reaches them on `127.0.0.1` over forwarded ports (loopback
@@ -70,7 +71,7 @@ Browse from the host at `http://127.0.0.1:<host-port>`. Host ports use the
 `8080`). Bind the guest service to `0.0.0.0` (not `127.0.0.1`) so the SLiRP
 forward can reach it. Adjust the map in `flake.nix` (`microvm.forwardPorts`).
 
-### Way A — protocol forwarding for GUI-only binaries (fallback)
+### Option B — protocol forwarding for GUI-only binaries (fallback)
 
 For tools with no headless mode (Ghidra, Cutter, Wireshark, Burp Community):
 
